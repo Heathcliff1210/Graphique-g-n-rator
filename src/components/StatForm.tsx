@@ -12,12 +12,13 @@ interface StatFormProps {
   onUpdateStats: (newStats: StatData[]) => void;
 }
 
-const RANK_VALUES = ["F", "E", "D", "C", "B", "A", "S", "SS", "SSS", "SR", "SSR", "UR"];
+const RANK_VALUES = ["F", "E", "D", "C", "B", "A", "S", "SS", "SSS", "SR", "SSR", "UR", "UR+"];
 const RANK_MODIFIER = ["", "+"];
 
 const getRankPercentage = (rank: string): number => {
   const basePercentages: { [key: string]: number } = {
-    'UR': 100,    // Maximum
+    'UR+': 110,    // Maximum
+    'UR': 100,
     'SSR+': 95,
     'SSR': 90,
     'SR+': 85,
