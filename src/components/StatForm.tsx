@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,28 +12,37 @@ interface StatFormProps {
   onUpdateStats: (newStats: StatData[]) => void;
 }
 
-const RANK_VALUES = ["F", "E", "D", "C", "B", "A", "S", "SS", "SSS"];
-const RANK_MODIFIER = ["", "+", "++"];
+const RANK_VALUES = ["F", "E", "D", "C", "B", "A", "S", "SS", "SSS", "SR", "SSR", "UR"];
+const RANK_MODIFIER = ["", "+"];
 
-// Map rank to percentage value
 const getRankPercentage = (rank: string): number => {
-  let base = 0;
-  let modifier = 0;
+  const basePercentages: { [key: string]: number } = {
+    'UR': 100,    // Maximum
+    'SSR+': 95,
+    'SSR': 90,
+    'SR+': 85,
+    'SR': 80,
+    'SSS+': 75,
+    'SSS': 70,
+    'SS+': 65,
+    'SS': 60,
+    'S+': 55,
+    'S': 50,
+    'A+': 45,
+    'A': 40,
+    'B+': 35,
+    'B': 30,
+    'C+': 25,
+    'C': 20,
+    'D+': 15,
+    'D': 10,
+    'E+': 7,
+    'E': 5,
+    'F+': 3,
+    'F': 1,
+  };
   
-  // Calculate base percentage
-  for (let i = 0; i < RANK_VALUES.length; i++) {
-    if (rank.startsWith(RANK_VALUES[i])) {
-      base = (i + 1) * 10;
-      break;
-    }
-  }
-  
-  // Add modifier bonus
-  if (rank.includes("+")) {
-    modifier = rank.endsWith("++") ? 8 : 5;
-  }
-  
-  return Math.min(base + modifier, 100);
+  return basePercentages[rank] || 1;
 };
 
 const StatForm: React.FC<StatFormProps> = ({ stats, onUpdateStats }) => {
@@ -61,7 +69,6 @@ const StatForm: React.FC<StatFormProps> = ({ stats, onUpdateStats }) => {
     
     let newStats = [...formStats];
     
-    // If increasing, add new stats
     if (newCount > formStats.length) {
       const additionalStats = Array.from({ length: newCount - formStats.length }, () => ({
         name: "STATISTIQUE",
@@ -70,7 +77,6 @@ const StatForm: React.FC<StatFormProps> = ({ stats, onUpdateStats }) => {
       }));
       newStats = [...newStats, ...additionalStats];
     } 
-    // If decreasing, remove stats
     else if (newCount < formStats.length) {
       newStats = newStats.slice(0, newCount);
     }
@@ -79,14 +85,12 @@ const StatForm: React.FC<StatFormProps> = ({ stats, onUpdateStats }) => {
   };
 
   const handleApplyChanges = () => {
-    // Validate that all stat names are filled
     const emptyNames = formStats.filter(stat => !stat.name.trim()).length;
     if (emptyNames > 0) {
       toast.error("Tous les noms de statistiques doivent être remplis");
       return;
     }
     
-    // Show animation feedback
     setIsAnimating(true);
     setTimeout(() => setIsAnimating(false), 500);
     
@@ -171,14 +175,18 @@ const StatForm: React.FC<StatFormProps> = ({ stats, onUpdateStats }) => {
                 value={stat.value}
                 onValueChange={(value) => handleStatValueChange(index, value)}
               >
-                <SelectTrigger id={`stat-value-${index}`} className="h-9">
+                <SelectTrigger id={`stat-value-${index}`} className="h-9 font-medium">
                   <SelectValue placeholder="Choisir une valeur" />
                 </SelectTrigger>
                 <SelectContent>
-                  {RANK_VALUES.map((rank) => (
+                  {RANK_VALUES.slice().reverse().map((rank) => (
                     <React.Fragment key={rank}>
                       {RANK_MODIFIER.map((mod) => (
-                        <SelectItem key={`${rank}${mod}`} value={`${rank}${mod}`}>
+                        <SelectItem 
+                          key={`${rank}${mod}`} 
+                          value={`${rank}${mod}`}
+                          className="font-semibold"
+                        >
                           {`${rank}${mod}`} ({getRankPercentage(`${rank}${mod}`)}%)
                         </SelectItem>
                       ))}

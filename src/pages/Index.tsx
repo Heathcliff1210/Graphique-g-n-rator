@@ -15,12 +15,12 @@ export type StatData = {
 };
 
 const DEFAULT_STATS: StatData[] = [
-  { name: "CONNAISSANCES", value: "A+", percentage: 90 },
-  { name: "VITESSE", value: "S+", percentage: 95 },
-  { name: "INTELLIGENCE", value: "A+", percentage: 85 },
-  { name: "POTENTIEL", value: "SS", percentage: 98 },
-  { name: "RÉACTIVITÉ", value: "S", percentage: 90 },
-  { name: "POLYVALENCE", value: "S", percentage: 85 }
+  { name: "CONNAISSANCES", value: "SSR", percentage: 90 },
+  { name: "VITESSE", value: "SR+", percentage: 85 },
+  { name: "INTELLIGENCE", value: "SSS+", percentage: 75 },
+  { name: "POTENTIEL", value: "UR", percentage: 100 },
+  { name: "RÉACTIVITÉ", value: "SSR+", percentage: 95 },
+  { name: "POLYVALENCE", value: "SR", percentage: 80 }
 ];
 
 const Index = () => {
