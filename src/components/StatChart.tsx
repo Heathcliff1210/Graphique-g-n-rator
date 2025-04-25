@@ -31,8 +31,29 @@ const StatChart: React.FC<StatChartProps> = ({ stats }) => {
     return `M${points.join(" L")} Z`;
   };
 
+  // Calculate optimal label positioning based on stat count
+  const getLabelPosition = (index: number, total: number, isValue: boolean) => {
+    const angle = (Math.PI * 2 * index) / total - Math.PI / 2;
+    const labelDistance = isValue ? 250 : 230;
+    
+    // Adjust distance based on number of stats (more stats = more space needed)
+    const adjustedDistance = labelDistance * (1 + (total > 6 ? 0.1 : 0));
+    
+    return {
+      x: Math.cos(angle) * adjustedDistance,
+      y: Math.sin(angle) * adjustedDistance,
+      anchor: Math.abs(Math.cos(angle)) < 0.3 ? "middle" : 
+              Math.cos(angle) > 0 ? "start" : "end"
+    };
+  };
+
+  // Determine appropriate font size based on text length
+  const getFontSize = (text: string) => {
+    return text.length > 12 ? 14 : 16;
+  };
+
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" id="stat-chart">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="-10 -10 620 620" id="stat-chart">
       {/* Fond blanc */}
       <rect width="600" height="600" fill="white"/>
       
@@ -48,9 +69,17 @@ const StatChart: React.FC<StatChartProps> = ({ stats }) => {
           <stop offset="50%" style={{stopColor:"#C850C0", stopOpacity:1}}/>
           <stop offset="100%" style={{stopColor:"#FFCC70", stopOpacity:1}}/>
         </linearGradient>
+        {/* New gradient for border glow effect */}
+        <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="4" result="blur" />
+          <feComposite in="SourceGraphic" in2="blur" operator="over" />
+        </filter>
       </defs>
 
       <g transform="translate(300,300)">
+        {/* Outer border with glow */}
+        <circle cx="0" cy="0" r="280" fill="none" stroke="#e0e0e0" strokeWidth="2" />
+
         {/* Hexagone externe et lignes de grille */}
         <g stroke="#000" strokeWidth="1" fill="none">
           {/* Grille principale - 5 niveaux */}
@@ -62,45 +91,63 @@ const StatChart: React.FC<StatChartProps> = ({ stats }) => {
         </g>
 
         {/* Zone des stats dynamique */}
-        <path d={createStatsPath()} fill="url(#statFill)" stroke="#000" strokeWidth="2"/>
+        <path 
+          d={createStatsPath()} 
+          fill="url(#statFill)" 
+          stroke="#000" 
+          strokeWidth="2"
+          className="transition-all duration-500 ease-in-out"
+        />
               
         {/* Zone centrale plus foncée */}
         <path d="M0,-80 L69.28,-40 L69.28,40 L0,80 L-69.28,40 L-69.28,-40 Z" 
               fill="url(#centerFill)" stroke="none"/>
 
         {/* Textes des stats */}
-        <g fontFamily="'Roboto', sans-serif" fontSize="16">
+        <g fontFamily="'Roboto', sans-serif">
           {/* Noms et valeurs des stats dynamiques */}
           {stats.map((stat, index) => {
-            const total = stats.length;
-            const angle = (Math.PI * 2 * index) / total - Math.PI / 2;
-            const labelDistance = 230;
-            const valueDistance = 250;
-            
-            const labelX = Math.cos(angle) * labelDistance;
-            const labelY = Math.sin(angle) * labelDistance;
-            const valueX = Math.cos(angle) * valueDistance;
-            const valueY = Math.sin(angle) * valueDistance;
-            
-            let anchor = "middle";
-            if (labelX > 50) anchor = "start";
-            if (labelX < -50) anchor = "end";
+            const labelPos = getLabelPosition(index, stats.length, false);
+            const valuePos = getLabelPosition(index, stats.length, true);
+            const fontSize = getFontSize(stat.name);
             
             return (
               <React.Fragment key={index}>
+                {/* Background for text clarity */}
+                <rect 
+                  x={labelPos.x - (labelPos.anchor === "end" ? 120 : labelPos.anchor === "start" ? 0 : 60)} 
+                  y={labelPos.y - 10} 
+                  width={120} 
+                  height={20} 
+                  fill="white" 
+                  fillOpacity="0.7"
+                  rx="4"
+                />
+                {/* Stat name with adjusted size */}
                 <text 
-                  x={labelX} 
-                  y={labelY} 
-                  textAnchor={anchor} 
+                  x={labelPos.x} 
+                  y={labelPos.y} 
+                  textAnchor={labelPos.anchor} 
                   fontWeight="bold" 
+                  fontSize={fontSize}
                   dominantBaseline="middle"
                 >
                   {stat.name}
                 </text>
+                {/* Value with background */}
+                <rect 
+                  x={valuePos.x - (valuePos.anchor === "end" ? 30 : valuePos.anchor === "start" ? 0 : 15)} 
+                  y={valuePos.y - 10} 
+                  width={30} 
+                  height={20} 
+                  fill="white" 
+                  fillOpacity="0.7"
+                  rx="4"
+                />
                 <text 
-                  x={valueX} 
-                  y={valueY} 
-                  textAnchor={anchor} 
+                  x={valuePos.x} 
+                  y={valuePos.y} 
+                  textAnchor={valuePos.anchor} 
                   fill="#444"
                   dominantBaseline="middle"
                 >

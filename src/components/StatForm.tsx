@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { StatData } from "@/pages/Index";
 import { toast } from "sonner";
+import { Plus, Minus, RefreshCw } from "lucide-react";
 
 interface StatFormProps {
   stats: StatData[];
@@ -39,6 +40,7 @@ const getRankPercentage = (rank: string): number => {
 const StatForm: React.FC<StatFormProps> = ({ stats, onUpdateStats }) => {
   const [statCount, setStatCount] = useState(stats.length || 6);
   const [formStats, setFormStats] = useState<StatData[]>(stats);
+  const [isAnimating, setIsAnimating] = useState(false);
   
   const handleStatNameChange = (index: number, name: string) => {
     const newStats = [...formStats];
@@ -84,56 +86,92 @@ const StatForm: React.FC<StatFormProps> = ({ stats, onUpdateStats }) => {
       return;
     }
     
+    // Show animation feedback
+    setIsAnimating(true);
+    setTimeout(() => setIsAnimating(false), 500);
+    
     onUpdateStats(formStats);
     toast.success("Statistiques mises à jour avec succès!");
+  };
+
+  const handleReset = () => {
+    const defaultStats = stats.slice(0, statCount);
+    setFormStats(defaultStats);
+    toast.info("Formulaire réinitialisé");
   };
 
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <Label htmlFor="stat-count">Nombre de statistiques</Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="stat-count">Nombre de statistiques</Label>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="outline" 
+              size="sm"
+              onClick={handleReset}
+              className="text-xs"
+              title="Réinitialiser le formulaire"
+            >
+              <RefreshCw className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        </div>
+        
         <div className="flex items-center gap-2">
           <Button
             variant="outline" 
             size="sm"
             onClick={() => handleStatCountChange(statCount - 1)}
             disabled={statCount <= 3}
+            title="Réduire le nombre de statistiques"
           >
-            -
+            <Minus className="h-4 w-4" />
           </Button>
-          <span className="w-8 text-center">{statCount}</span>
+          <div className="w-12 h-10 flex items-center justify-center bg-muted rounded-md font-medium">
+            {statCount}
+          </div>
           <Button
             variant="outline"
             size="sm"
             onClick={() => handleStatCountChange(statCount + 1)}
             disabled={statCount >= 12}
+            title="Augmenter le nombre de statistiques"
           >
-            +
+            <Plus className="h-4 w-4" />
           </Button>
+          <span className="text-sm text-muted-foreground ml-2">Min: 3, Max: 12</span>
         </div>
-        <p className="text-sm text-muted-foreground">Minimum: 3, Maximum: 12</p>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
         {formStats.slice(0, statCount).map((stat, index) => (
-          <div key={index} className="grid grid-cols-2 gap-4">
+          <div 
+            key={index} 
+            className="grid grid-cols-2 gap-4 p-3 border border-border/50 rounded-md hover:border-border transition-all"
+          >
             <div className="space-y-2">
-              <Label htmlFor={`stat-name-${index}`}>Nom</Label>
+              <Label htmlFor={`stat-name-${index}`} className="text-xs">
+                Nom de la statistique {index + 1}
+              </Label>
               <Input
                 id={`stat-name-${index}`}
                 value={stat.name}
                 onChange={(e) => handleStatNameChange(index, e.target.value)}
                 maxLength={20}
                 placeholder="Nom de la statistique"
+                className="h-9"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor={`stat-value-${index}`}>Valeur</Label>
+              <Label htmlFor={`stat-value-${index}`} className="text-xs">
+                Valeur
+              </Label>
               <Select
                 value={stat.value}
                 onValueChange={(value) => handleStatValueChange(index, value)}
               >
-                <SelectTrigger id={`stat-value-${index}`}>
+                <SelectTrigger id={`stat-value-${index}`} className="h-9">
                   <SelectValue placeholder="Choisir une valeur" />
                 </SelectTrigger>
                 <SelectContent>
@@ -141,7 +179,7 @@ const StatForm: React.FC<StatFormProps> = ({ stats, onUpdateStats }) => {
                     <React.Fragment key={rank}>
                       {RANK_MODIFIER.map((mod) => (
                         <SelectItem key={`${rank}${mod}`} value={`${rank}${mod}`}>
-                          {`${rank}${mod}`}
+                          {`${rank}${mod}`} ({getRankPercentage(`${rank}${mod}`)}%)
                         </SelectItem>
                       ))}
                     </React.Fragment>
@@ -154,7 +192,7 @@ const StatForm: React.FC<StatFormProps> = ({ stats, onUpdateStats }) => {
       </div>
 
       <Button 
-        className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+        className={`w-full transition-all duration-300 ${isAnimating ? "animate-pulse" : ""} bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700`}
         onClick={handleApplyChanges}
       >
         Appliquer les changements
