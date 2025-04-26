@@ -2,11 +2,12 @@ services:
   - type: web
     name: stat-viz-generator
     env: static
-    buildCommand: npm run build
+    # Utilisons un build command qui évite les problèmes de version avec esbuild
+    buildCommand: NODE_OPTIONS=--openssl-legacy-provider npm ci --omit=dev && npm run build
     staticPublishPath: ./dist
     envVars:
       - key: NODE_VERSION
-        value: 20
+        value: 16.20.0
     routes:
       - type: rewrite
         source: /*
