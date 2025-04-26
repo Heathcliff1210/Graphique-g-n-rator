@@ -31,11 +31,12 @@ const StatChart: React.FC<StatChartProps> = ({ stats }) => {
 
   const getLabelPosition = (index: number, total: number, isValue: boolean) => {
     const angle = (Math.PI * 2 * index) / total - Math.PI / 2;
-    // Augmenter la distance pour éviter les chevauchements
-    const labelDistance = isValue ? 290 : 250;
+    
+    // Rapprocher les labels du graphique
+    const labelDistance = isValue ? 290 : 230;  // Réduit de 250 à 230 pour les noms
     
     // Ajuster encore plus si nécessaire selon le nombre de statistiques
-    const adjustedDistance = labelDistance * (1 + (total > 6 ? 0.15 : 0));
+    const adjustedDistance = labelDistance * (1 + (total > 6 ? 0.1 : 0));
     
     return {
       x: Math.cos(angle) * adjustedDistance,
