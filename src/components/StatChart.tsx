@@ -31,10 +31,10 @@ const StatChart: React.FC<StatChartProps> = ({ stats }) => {
 
   const getLabelPosition = (index: number, total: number, isValue: boolean) => {
     const angle = (Math.PI * 2 * index) / total - Math.PI / 2;
-    // Augmenter la distance pour éviter les chevauchements
-    const labelDistance = isValue ? 290 : 250;
+    // Adjusted label distances to match the reference image
+    const labelDistance = isValue ? 310 : 270;
     
-    // Ajuster encore plus si nécessaire selon le nombre de statistiques
+    // Adjusted to prevent overlap and improve readability
     const adjustedDistance = labelDistance * (1 + (total > 6 ? 0.15 : 0));
     
     return {
