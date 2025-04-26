@@ -4,9 +4,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Download, Save } from "lucide-react";
+import { Download } from "lucide-react";
 import StatChart from "@/components/StatChart";
 import StatForm from "@/components/StatForm";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 export type StatData = {
   name: string;
@@ -27,10 +29,16 @@ const Index = () => {
   const [stats, setStats] = useState<StatData[]>(DEFAULT_STATS);
   const [isDownloading, setIsDownloading] = useState<boolean>(false);
   const [filename, setFilename] = useState<string>("stat-chart");
+  const [maxRank, setMaxRank] = useState<string>("UR");
+  const [transparentBg, setTransparentBg] = useState<boolean>(false);
   const chartRef = useRef<HTMLDivElement>(null);
   
   const handleStatsUpdate = (newStats: StatData[]) => {
     setStats(newStats);
+  };
+
+  const handleMaxRankChange = (rank: string) => {
+    setMaxRank(rank);
   };
 
   const handleDownload = async () => {
@@ -64,22 +72,50 @@ const Index = () => {
       
       img.onload = () => {
         if (ctx) {
-          ctx.fillStyle = "white";
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          if (!transparentBg) {
+            // Ajouter un fond blanc uniquement si l'option transparente n'est pas sélectionnée
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+          }
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
           
-          // Convert canvas to PNG with high quality
+          // Spécifier le format PNG avec transparence
           const pngUrl = canvas.toDataURL("image/png", 1.0);
           
-          // Create download link with custom filename
-          const downloadLink = document.createElement("a");
-          downloadLink.href = pngUrl;
-          downloadLink.download = `${filename || "stat-chart"}.png`;
-          downloadLink.click();
+          // Créer un lien de téléchargement
+          if (navigator.userAgent.match(/android|iphone|ipad|ipod/i)) {
+            // Pour les appareils mobiles, utiliser l'API de partage si disponible
+            try {
+              const blob = dataURItoBlob(pngUrl);
+              const file = new File([blob], `${filename || "stat-chart"}.png`, { type: "image/png" });
+              
+              if (navigator.share) {
+                navigator.share({
+                  files: [file],
+                  title: "Statistiques",
+                  text: "Mon graphique de statistiques"
+                }).then(() => {
+                  toast.success("Image partagée avec succès!");
+                }).catch((error) => {
+                  console.error("Erreur de partage:", error);
+                  // Fallback pour le téléchargement direct
+                  downloadImage(pngUrl);
+                });
+              } else {
+                // Fallback pour le téléchargement direct
+                downloadImage(pngUrl);
+              }
+            } catch (error) {
+              console.error("Erreur lors du partage:", error);
+              downloadImage(pngUrl);
+            }
+          } else {
+            // Sur desktop, téléchargement classique
+            downloadImage(pngUrl);
+          }
           
           // Clean up
           URL.revokeObjectURL(url);
-          toast.success("Image téléchargée avec succès!");
         }
         setIsDownloading(false);
       };
@@ -90,6 +126,29 @@ const Index = () => {
       toast.error("Erreur lors du téléchargement");
       setIsDownloading(false);
     }
+  };
+
+  // Fonction de téléchargement standard
+  const downloadImage = (dataUrl: string) => {
+    const downloadLink = document.createElement("a");
+    downloadLink.href = dataUrl;
+    downloadLink.download = `${filename || "stat-chart"}.png`;
+    downloadLink.click();
+    toast.success("Image téléchargée avec succès!");
+  };
+
+  // Fonction pour convertir Data URI en Blob
+  const dataURItoBlob = (dataURI: string) => {
+    const byteString = atob(dataURI.split(',')[1]);
+    const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+    
+    for (let i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+    }
+    
+    return new Blob([ab], { type: mimeString });
   };
 
   return (
@@ -104,7 +163,12 @@ const Index = () => {
           <Card className="shadow-lg transition-all hover:shadow-xl">
             <CardContent className="p-6">
               <h2 className="text-xl font-semibold mb-4">Configuration des Statistiques</h2>
-              <StatForm stats={stats} onUpdateStats={handleStatsUpdate} />
+              <StatForm 
+                stats={stats} 
+                onUpdateStats={handleStatsUpdate} 
+                maxRank={maxRank}
+                onMaxRankChange={handleMaxRankChange}
+              />
               
               <div className="border-t mt-6 pt-4">
                 <div className="flex flex-col space-y-2">
@@ -115,7 +179,7 @@ const Index = () => {
                     <div>S &lt; SS &lt; SSS</div>
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Note: Un "+" ajoute 5% à la valeur, et "++" ajoute 8%.
+                    Note: Un "+" ajoute 10% à la valeur de base.
                   </p>
                 </div>
               </div>
@@ -133,9 +197,9 @@ const Index = () => {
               
               <div className="w-full mt-4 space-y-4">
                 <div className="grid grid-cols-1 gap-2">
-                  <label htmlFor="filename" className="text-sm font-medium">
+                  <Label htmlFor="filename" className="text-sm font-medium">
                     Nom du fichier
-                  </label>
+                  </Label>
                   <Input
                     id="filename"
                     value={filename}
@@ -143,6 +207,17 @@ const Index = () => {
                     placeholder="Nom du fichier d'export"
                     className="mb-2"
                   />
+                </div>
+                
+                <div className="flex items-center space-x-2 mb-4">
+                  <Switch
+                    id="transparent-mode"
+                    checked={transparentBg}
+                    onCheckedChange={setTransparentBg}
+                  />
+                  <Label htmlFor="transparent-mode" className="text-sm cursor-pointer">
+                    Fond transparent
+                  </Label>
                 </div>
                 
                 <Button 

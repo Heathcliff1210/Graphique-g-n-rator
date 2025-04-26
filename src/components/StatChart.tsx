@@ -1,3 +1,4 @@
+
 import React from "react";
 import { StatData } from "@/pages/Index";
 
@@ -30,8 +31,10 @@ const StatChart: React.FC<StatChartProps> = ({ stats }) => {
 
   const getLabelPosition = (index: number, total: number, isValue: boolean) => {
     const angle = (Math.PI * 2 * index) / total - Math.PI / 2;
-    const labelDistance = isValue ? 270 : 240;
+    // Augmenter la distance pour éviter les chevauchements
+    const labelDistance = isValue ? 290 : 250;
     
+    // Ajuster encore plus si nécessaire selon le nombre de statistiques
     const adjustedDistance = labelDistance * (1 + (total > 6 ? 0.15 : 0));
     
     return {
@@ -43,7 +46,7 @@ const StatChart: React.FC<StatChartProps> = ({ stats }) => {
   };
 
   const getFontSize = (text: string) => {
-    return text.length > 12 ? 12 : 14;
+    return text.length > 12 ? 11 : 13;
   };
 
   return (
@@ -97,11 +100,12 @@ const StatChart: React.FC<StatChartProps> = ({ stats }) => {
             
             return (
               <React.Fragment key={index}>
+                {/* Fond semi-transparent pour les noms de statistiques */}
                 <rect 
-                  x={labelPos.x - (labelPos.anchor === "end" ? 120 : labelPos.anchor === "start" ? 0 : 60)} 
-                  y={labelPos.y - 12} 
-                  width={120} 
-                  height={24} 
+                  x={labelPos.x - (labelPos.anchor === "end" ? 130 : labelPos.anchor === "start" ? 0 : 65)} 
+                  y={labelPos.y - 14} 
+                  width={130} 
+                  height={28} 
                   fill="white" 
                   fillOpacity="0.95"
                   rx="4"
@@ -110,18 +114,20 @@ const StatChart: React.FC<StatChartProps> = ({ stats }) => {
                   x={labelPos.x} 
                   y={labelPos.y} 
                   textAnchor={labelPos.anchor} 
-                  fontWeight="500"
+                  fontWeight="600"
                   fontSize={fontSize}
                   dominantBaseline="middle"
                   className="stat-name"
                 >
                   {stat.name}
                 </text>
+                
+                {/* Fond semi-transparent amélioré pour les valeurs */}
                 <rect 
-                  x={valuePos.x - (valuePos.anchor === "end" ? 50 : valuePos.anchor === "start" ? 0 : 25)} 
-                  y={valuePos.y - 14} 
-                  width={50} 
-                  height={28} 
+                  x={valuePos.x - (valuePos.anchor === "end" ? 60 : valuePos.anchor === "start" ? 0 : 30)} 
+                  y={valuePos.y - 16} 
+                  width={60} 
+                  height={32} 
                   fill="white" 
                   fillOpacity="0.95"
                   rx="4"
@@ -133,7 +139,7 @@ const StatChart: React.FC<StatChartProps> = ({ stats }) => {
                   y={valuePos.y} 
                   textAnchor={valuePos.anchor} 
                   fill="#000"
-                  fontWeight="600"
+                  fontWeight="700"
                   fontSize="16"
                   dominantBaseline="middle"
                   className="stat-value"

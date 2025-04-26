@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,47 +7,68 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { StatData } from "@/pages/Index";
 import { toast } from "sonner";
 import { Plus, Minus, RefreshCw } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 
 interface StatFormProps {
   stats: StatData[];
   onUpdateStats: (newStats: StatData[]) => void;
+  maxRank: string;
+  onMaxRankChange: (rank: string) => void;
 }
 
-const RANK_VALUES = ["F", "E", "D", "C", "B", "A", "S", "SS", "SSS", "SR", "SSR", "UR", "UR+"];
+const RANK_VALUES = ["F", "E", "D", "C", "B", "A", "S", "SS", "SSS", "SR", "SSR", "UR"];
 const RANK_MODIFIER = ["", "+"];
 
-const getRankPercentage = (rank: string): number => {
-  const basePercentages: { [key: string]: number } = {
-    'UR+': 110,    // Maximum
-    'UR': 100,
-    'SSR+': 95,
-    'SSR': 90,
-    'SR+': 85,
-    'SR': 80,
-    'SSS+': 75,
-    'SSS': 70,
-    'SS+': 65,
-    'SS': 60,
-    'S+': 55,
-    'S': 50,
-    'A+': 45,
-    'A': 40,
-    'B+': 35,
-    'B': 30,
-    'C+': 25,
-    'C': 20,
-    'D+': 15,
-    'D': 10,
-    'E+': 7,
-    'E': 5,
-    'F+': 3,
-    'F': 1,
+const getRankPercentage = (rank: string, maxRank: string): number => {
+  // Valeurs de base pour tous les rangs
+  const rankOrder: { [key: string]: number } = {
+    'UR+': 14,
+    'UR': 13,
+    'SSR+': 12,
+    'SSR': 11,
+    'SR+': 10,
+    'SR': 9,
+    'SSS+': 8,
+    'SSS': 7,
+    'SS+': 6,
+    'SS': 5,
+    'S+': 4,
+    'S': 3,
+    'A+': 2,
+    'A': 1,
+    'B+': 0.8,
+    'B': 0.6,
+    'C+': 0.5,
+    'C': 0.4,
+    'D+': 0.3,
+    'D': 0.2,
+    'E+': 0.15,
+    'E': 0.1,
+    'F+': 0.05,
+    'F': 0.01,
   };
+
+  // Trouver la valeur du rang maximum (100%)
+  const maxRankValue = rankOrder[maxRank] || rankOrder['UR'];
   
-  return basePercentages[rank] || 1;
+  // Calculer le pourcentage en fonction du rang maximum
+  const rankValue = rankOrder[rank] || 0;
+  
+  // Si c'est le rang maximum + modificateur, renvoyer 110%
+  if (rank === maxRank + '+') {
+    return 110;
+  }
+  
+  // Si c'est le rang maximum, renvoyer 100%
+  if (rank === maxRank) {
+    return 100;
+  }
+  
+  // Sinon calculer le pourcentage en fonction du rang max
+  return Math.round((rankValue / maxRankValue) * 100);
 };
 
-const StatForm: React.FC<StatFormProps> = ({ stats, onUpdateStats }) => {
+const StatForm: React.FC<StatFormProps> = ({ stats, onUpdateStats, maxRank, onMaxRankChange }) => {
   const [statCount, setStatCount] = useState(stats.length || 6);
   const [formStats, setFormStats] = useState<StatData[]>(stats);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -59,9 +81,25 @@ const StatForm: React.FC<StatFormProps> = ({ stats, onUpdateStats }) => {
 
   const handleStatValueChange = (index: number, value: string) => {
     const newStats = [...formStats];
-    const percentage = getRankPercentage(value);
+    const percentage = getRankPercentage(value, maxRank);
     newStats[index] = { ...newStats[index], value, percentage };
     setFormStats(newStats);
+  };
+
+  const handleMaxRankChange = (newMaxRank: string) => {
+    onMaxRankChange(newMaxRank);
+    
+    // Recalculer les pourcentages pour toutes les stats existantes
+    const updatedStats = formStats.map(stat => ({
+      ...stat,
+      percentage: getRankPercentage(stat.value, newMaxRank)
+    }));
+    
+    setFormStats(updatedStats);
+    
+    // Appliquer les changements immédiatement
+    onUpdateStats(updatedStats);
+    toast.success(`Rang maximum défini sur ${newMaxRank}`);
   };
 
   const handleStatCountChange = (count: number) => {
@@ -74,7 +112,7 @@ const StatForm: React.FC<StatFormProps> = ({ stats, onUpdateStats }) => {
       const additionalStats = Array.from({ length: newCount - formStats.length }, () => ({
         name: "STATISTIQUE",
         value: "A",
-        percentage: 70
+        percentage: getRankPercentage("A", maxRank)
       }));
       newStats = [...newStats, ...additionalStats];
     } 
@@ -107,45 +145,73 @@ const StatForm: React.FC<StatFormProps> = ({ stats, onUpdateStats }) => {
 
   return (
     <div className="space-y-6">
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="stat-count">Nombre de statistiques</Label>
-          <div className="flex items-center gap-1">
+      <div className="space-y-4">
+        <div className="p-3 border border-border/50 rounded-md bg-muted/30">
+          <Label className="font-medium mb-2 block">Rang Maximum (100%)</Label>
+          <Select 
+            value={maxRank} 
+            onValueChange={handleMaxRankChange}
+          >
+            <SelectTrigger className="h-9 font-medium">
+              <SelectValue placeholder="Choisir le rang maximum" />
+            </SelectTrigger>
+            <SelectContent>
+              {RANK_VALUES.slice(2).reverse().map((rank) => (
+                <SelectItem 
+                  key={rank} 
+                  value={rank}
+                  className="font-semibold"
+                >
+                  {rank} (100%)
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground mt-2">
+            Le rang sélectionné sera défini à 100% et tous les autres rangs seront ajustés en conséquence
+          </p>
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="stat-count">Nombre de statistiques</Label>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="outline" 
+                size="sm"
+                onClick={handleReset}
+                className="text-xs"
+                title="Réinitialiser le formulaire"
+              >
+                <RefreshCw className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2">
             <Button
               variant="outline" 
               size="sm"
-              onClick={handleReset}
-              className="text-xs"
-              title="Réinitialiser le formulaire"
+              onClick={() => handleStatCountChange(statCount - 1)}
+              disabled={statCount <= 3}
+              title="Réduire le nombre de statistiques"
             >
-              <RefreshCw className="h-3.5 w-3.5" />
+              <Minus className="h-4 w-4" />
             </Button>
+            <div className="w-12 h-10 flex items-center justify-center bg-muted rounded-md font-medium">
+              {statCount}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleStatCountChange(statCount + 1)}
+              disabled={statCount >= 12}
+              title="Augmenter le nombre de statistiques"
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+            <span className="text-sm text-muted-foreground ml-2">Min: 3, Max: 12</span>
           </div>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline" 
-            size="sm"
-            onClick={() => handleStatCountChange(statCount - 1)}
-            disabled={statCount <= 3}
-            title="Réduire le nombre de statistiques"
-          >
-            <Minus className="h-4 w-4" />
-          </Button>
-          <div className="w-12 h-10 flex items-center justify-center bg-muted rounded-md font-medium">
-            {statCount}
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleStatCountChange(statCount + 1)}
-            disabled={statCount >= 12}
-            title="Augmenter le nombre de statistiques"
-          >
-            <Plus className="h-4 w-4" />
-          </Button>
-          <span className="text-sm text-muted-foreground ml-2">Min: 3, Max: 12</span>
         </div>
       </div>
 
@@ -182,15 +248,18 @@ const StatForm: React.FC<StatFormProps> = ({ stats, onUpdateStats }) => {
                 <SelectContent>
                   {RANK_VALUES.slice().reverse().map((rank) => (
                     <React.Fragment key={rank}>
-                      {RANK_MODIFIER.map((mod) => (
-                        <SelectItem 
-                          key={`${rank}${mod}`} 
-                          value={`${rank}${mod}`}
-                          className="font-semibold"
-                        >
-                          {`${rank}${mod}`} ({getRankPercentage(`${rank}${mod}`)}%)
-                        </SelectItem>
-                      ))}
+                      {RANK_MODIFIER.map((mod) => {
+                        const fullRank = `${rank}${mod}`;
+                        return (
+                          <SelectItem 
+                            key={fullRank} 
+                            value={fullRank}
+                            className="font-semibold"
+                          >
+                            {fullRank} ({getRankPercentage(fullRank, maxRank)}%)
+                          </SelectItem>
+                        );
+                      })}
                     </React.Fragment>
                   ))}
                 </SelectContent>
