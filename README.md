@@ -1,58 +1,62 @@
-# Welcome to your Lovable project
+# Générateur de graphique de statistiques
 
-## Project info
+## À propos du projet
 
-**URL**: https://lovable.dev/projects/952f59f9-29c6-4a02-925d-2fb343614497
+Une application web pour générer facilement des graphiques de statistiques personnalisés et les exporter en haute qualité.
 
-## How can I edit this code?
+## Fonctionnalités
 
-There are several ways of editing your application.
+- Création de graphiques de statistiques radar 
+- Personnalisation du nombre de statistiques (3 à 12)
+- Système de classement hiérarchique (F à UR)
+- Export en PNG avec ou sans fond transparent
+- Interface intuitive en français
 
-**Use Lovable**
+## Développeur
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/952f59f9-29c6-4a02-925d-2fb343614497) and start prompting.
+Ce projet a été développé par Izumi Hearthcliff.
 
-Changes made via Lovable will be committed automatically to this repo.
+## Comment utiliser ce code ?
 
-**Use your preferred IDE**
+**Utiliser votre IDE préféré**
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+Pour travailler localement avec votre propre IDE, vous pouvez cloner ce dépôt.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+Le seul prérequis est d'avoir Node.js et npm installés - [installer avec nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
-Follow these steps:
+Suivez ces étapes :
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+# Étape 1 : Cloner le dépôt en utilisant l'URL Git du projet.
+git clone <URL_GIT_DU_PROJET>
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Étape 2 : Naviguer vers le répertoire du projet.
+cd <NOM_DU_PROJET>
 
-# Step 3: Install the necessary dependencies.
+# Étape 3 : Installer les dépendances nécessaires.
 npm i
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Étape 4 : Démarrer le serveur de développement avec rechargement automatique.
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+**Modifier un fichier directement sur GitHub**
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- Naviguer vers le(s) fichier(s) souhaité(s).
+- Cliquer sur le bouton "Edit" (icône crayon) en haut à droite de la vue du fichier.
+- Faire vos modifications et les valider.
 
-**Use GitHub Codespaces**
+**Utiliser GitHub Codespaces**
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+- Naviguer vers la page principale de votre dépôt.
+- Cliquer sur le bouton "Code" (bouton vert) près du coin supérieur droit.
+- Sélectionner l'onglet "Codespaces".
+- Cliquer sur "New codespace" pour lancer un nouvel environnement Codespace.
+- Modifier les fichiers directement dans le Codespace et valider vos modifications une fois terminé.
 
-## What technologies are used for this project?
+## Technologies utilisées dans ce projet
 
-This project is built with:
+Ce projet est construit avec :
 
 - Vite
 - TypeScript
@@ -60,14 +64,18 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
-## How can I deploy this project?
+## Comment déployer ce projet ?
 
-Simply open [Lovable](https://lovable.dev/projects/952f59f9-29c6-4a02-925d-2fb343614497) and click on Share -> Publish.
+### Déploiement sur Render
 
-## Can I connect a custom domain to my Lovable project?
+1. Connectez-vous à [Render](https://render.com/)
+2. Créez un nouveau "Static Site"
+3. Connectez votre dépôt GitHub
+4. Configuration de build :
+   - Build Command : `npm run build`
+   - Publish Directory : `dist`
+5. Cliquez sur "Create Static Site"
 
-Yes, you can!
+### Autres options de déploiement
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+Ce projet peut également être déployé sur Vercel, Netlify ou tout autre hébergeur qui prend en charge les applications React/Vite.

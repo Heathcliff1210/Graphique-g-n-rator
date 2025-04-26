@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g>
+    <!-- Contour noir du cube -->
+    <path d="M256 24L464 143.57V381.71L256 488L48 381.71V143.57L256 24Z" stroke="black" stroke-width="16" fill="none"/>
+    
+    <!-- Lignes internes -->
+    <path d="M48 143.57L256 256M256 256L464 143.57M256 256V488" stroke="black" stroke-width="12" fill="none"/>
+    
+    <!-- Faces du cube avec dégradé -->
+    <path d="M48 143.57L256 24L464 143.57L256 256L48 143.57Z" fill="url(#grad-top)"/>
+    <path d="M48 143.57L256 256L256 488L48 381.71L48 143.57Z" fill="url(#grad-left)"/>
+    <path d="M256 256L464 143.57L464 381.71L256 488L256 256Z" fill="url(#grad-right)"/>
+  </g>
+  
+  <!-- Définition des dégradés -->
+  <defs>
+    <linearGradient id="grad-top" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8A6FD6" />
+      <stop offset="60%" stop-color="#BA6FD6" />
+      <stop offset="100%" stop-color="#E86FD6" />
+    </linearGradient>
+    <linearGradient id="grad-left" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6F7FD6" />
+      <stop offset="50%" stop-color="#9E6FD6" />
+      <stop offset="100%" stop-color="#D56FD6" />
+    </linearGradient>
+    <linearGradient id="grad-right" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#B86FD6" />
+      <stop offset="50%" stop-color="#D36FD6" />
+      <stop offset="100%" stop-color="#E86FB6" />
+    </linearGradient>
+  </defs>
+</svg>
